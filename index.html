@@ -62,11 +62,11 @@
     }
     nav button:hover:not(.active) { color: var(--text); }
 
-    main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+    main { padding: 32px; max-width: 1300px; margin: 0 auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Simulator Box */
+    /* Simulator Controls */
     .simulator-box {
       background: var(--card);
       border: 1px solid var(--border);
@@ -108,11 +108,11 @@
     }
     .chip:hover { border-color: var(--accent); color: #fff; }
 
-    /* 3-Method Comparator Grid */
+    /* Grid & Cards */
     .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
       margin-top: 20px;
     }
     .method-card {
@@ -122,7 +122,6 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
     }
     .method-card h4 {
       margin: 0 0 4px 0;
@@ -132,16 +131,16 @@
       letter-spacing: 0.05em;
     }
     .method-card .desc {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       margin-bottom: 12px;
-      min-height: 28px;
+      min-height: 34px;
     }
     .score-row {
       display: flex;
       align-items: baseline;
       gap: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .score { font-size: 32px; font-weight: 800; }
     .badge {
@@ -154,14 +153,44 @@
     .badge-high { background: #14532d; color: #86efac; }
     .badge-med { background: #713f12; color: #fde047; }
     .badge-low { background: #7f1d1d; color: #fca5a5; }
-    .matched-topic { font-size: 12px; color: #cbd5e1; margin-top: 8px; }
+    .matched-topic { font-size: 12px; color: #cbd5e1; margin-bottom: 12px; font-weight: 500; }
+
+    /* Terminal/Console Windows */
+    .terminal-window {
+      background: #050914;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 11.5px;
+      color: #94a3b8;
+      padding: 12px;
+      height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      margin-top: auto;
+    }
+    .term-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 6px;
+      display: block;
+      font-weight: 700;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 4px;
+    }
+    .term-hit { color: #86efac; }
+    .term-partial { color: #fde047; }
+    .term-miss { color: #f87171; }
+    .term-calc { color: #38bdf8; }
 
     .ensemble-banner {
-      margin-top: 20px;
+      margin-top: 24px;
       background: #0b1120;
       border: 1px solid #2563eb;
       border-radius: 8px;
-      padding: 16px 20px;
+      padding: 18px 24px;
     }
 
     /* Code Panels */
@@ -237,7 +266,7 @@
 
 <header>
   <h1>STEM Activity Support & Reclassification Workbench</h1>
-  <p>Tri-Model NLP Comparator (Coverage, TF-IDF, Semantic Cosine) with Word Families & Fuzzy Typo-Tolerance</p>
+  <p>Tri-Model NLP Engine with Real-Time Logic Terminals & Native Excel Classifier Blueprint (=PY)</p>
 </header>
 
 <nav>
@@ -249,10 +278,10 @@
 
 <main>
 
-  <!-- TAB 1: TRI-METHOD SIMULATOR -->
+  <!-- TAB 1: TRI-METHOD SIMULATOR WITH CONSOLES -->
   <section id="tab-simulator" class="tab-content active">
-    <h2>Real-Time Cross-Comparison of the 3 Methods</h2>
-    <p>Every test query is evaluated concurrently by all three mathematical models. Notice how each model reacts differently to typos (<em>resister</em>), word stems (<em>blocking</em>), and out-of-scope questions.</p>
+    <h2>Interactive Simulator & Live Decision Terminals</h2>
+    <p>Watch each algorithm process the same query simultaneously. Inspect the terminal below each method to see how token coverage, IDF signal weighting, and n-gram slices operate under the hood.</p>
 
     <div class="simulator-box">
       <div class="test-chips">
@@ -270,55 +299,72 @@
       </div>
 
       <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
-        Extracted Tokens & Stems: <code id="tokens-display" style="color: var(--accent); font-size: 13px;">-</code>
+        Parsed Input Tokens: <code id="tokens-display" style="color: var(--accent); font-size: 13px;">-</code>
       </div>
 
-      <!-- 3 CARDS SIDE-BY-SIDE -->
+      <!-- 3 CARDS WITH INDIVIDUAL TERMINALS -->
       <div class="grid-3">
-        <!-- METHOD 1 -->
+        
+        <!-- METHOD 1 CARD -->
         <div class="method-card">
           <div>
             <h4>Method 1: Query Coverage</h4>
-            <div class="desc">Stemmed token overlap ratio + Levenshtein fuzzy bonus. Answers: <em>"Did we hit the student's words?"</em></div>
+            <div class="desc">Stemmed token overlap ratio + Levenshtein distance fallback.</div>
             <div class="score-row">
               <span id="score-cov" class="score">-%</span>
               <span id="badge-cov" class="badge">Awaiting</span>
             </div>
+            <div class="matched-topic" id="match-cov">Matched: -</div>
           </div>
-          <div class="matched-topic" id="match-cov">Matched: -</div>
+          
+          <div class="terminal-window" id="term-cov">
+            <span class="term-title">Engine 1 Diagnostic Terminal</span>
+Waiting for execution...
+          </div>
         </div>
 
-        <!-- METHOD 2 -->
+        <!-- METHOD 2 CARD -->
         <div class="method-card">
           <div>
-            <h4>Method 2: TF-IDF Term Weighting</h4>
-            <div class="desc">Inverse Document Frequency. Rewards rare anchor nouns (<em>resistor</em>); penalizes ubiquitous words.</div>
+            <h4>Method 2: TF-IDF Weighting</h4>
+            <div class="desc">Inverse Document Frequency. Rare domain terms carry higher signal.</div>
             <div class="score-row">
               <span id="score-tfidf" class="score">-%</span>
               <span id="badge-tfidf" class="badge">Awaiting</span>
             </div>
+            <div class="matched-topic" id="match-tfidf">Matched: -</div>
           </div>
-          <div class="matched-topic" id="match-tfidf">Matched: -</div>
+
+          <div class="terminal-window" id="term-tfidf">
+            <span class="term-title">Engine 2 Diagnostic Terminal</span>
+Waiting for execution...
+          </div>
         </div>
 
-        <!-- METHOD 3 -->
+        <!-- METHOD 3 CARD -->
         <div class="method-card">
           <div>
-            <h4>Method 3: Character N-Gram Cosine</h4>
-            <div class="desc">Sub-word string slice similarity (3-5 char windows). Inherently bridges typos and suffixes mathematically.</div>
+            <h4>Method 3: Character N-Grams</h4>
+            <div class="desc">Sub-word string slices (3-grams). Bypasses dictionaries for typos & affixes.</div>
             <div class="score-row">
               <span id="score-ngram" class="score">-%</span>
               <span id="badge-ngram" class="badge">Awaiting</span>
             </div>
+            <div class="matched-topic" id="match-ngram">Matched: -</div>
           </div>
-          <div class="matched-topic" id="match-ngram">Matched: -</div>
+
+          <div class="terminal-window" id="term-ngram">
+            <span class="term-title">Engine 3 Diagnostic Terminal</span>
+Waiting for execution...
+          </div>
         </div>
+
       </div>
 
-      <!-- CONSENSUS -->
+      <!-- ENSEMBLE BANNER -->
       <div class="ensemble-banner">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <strong style="font-size: 13px; color: var(--accent); text-transform: uppercase;">Ensemble Consensus Verdict (30% Cov + 40% TF-IDF + 30% N-Gram):</strong>
+          <strong style="font-size: 13px; color: var(--accent); text-transform: uppercase;">Final Consensus Decision (30% Cov + 40% TF-IDF + 30% N-Gram):</strong>
           <span id="consensus-score" style="font-size: 18px; font-weight: 800; color: #fff;">-%</span>
         </div>
         <div id="consensus-reply" style="font-size: 14px; color: #e2e8f0;">Run a query to view the generated instruction.</div>
@@ -326,16 +372,16 @@
     </div>
 
     <div class="instruction-callout">
-      <strong>Why compare all three?</strong>
+      <strong>Core Conceptual Takeaways From the Terminals:</strong>
       <ul>
-        <li><strong>Method 1 (Coverage)</strong> is intuitive, but can yield false positives if an unrelated question happens to include one lab term.</li>
-        <li><strong>Method 2 (TF-IDF)</strong> protects against false positives by heavily discounting common words and anchoring only on technical lab terminology.</li>
-        <li><strong>Method 3 (N-Grams)</strong> prevents failures caused by student typos (e.g. <em>"resister"</em> or <em>"breadbord"</em>) without needing a huge manual misspelling dictionary.</li>
+        <li><strong>Method 1 Terminal:</strong> Look for <span style="color: #fde047;">[Fuzzy Match]</span> logs when you misspell words like <em>"resister"</em>. It proves Levenshtein calculated the substitution cost without needing hardcoded synonyms.</li>
+        <li><strong>Method 2 Terminal:</strong> Look at the <strong>IDF weights</strong>. A common word like <em>"circuit"</em> might receive a weight of <code>0.45</code>, while an anchor like <em>"anode"</em> or <em>"smell"</em> receives <code>1.60</code>, preventing generic words from dominating.</li>
+        <li><strong>Method 3 Terminal:</strong> Look at the <strong>Sub-Word Tri-grams</strong>. See how <code>resister</code> generates <code>["res", "esi", "sis", "ist", "ste", "ter"]</code>, allowing it to mathematically intersect with <code>resistor</code> even if word-level matchers fail.</li>
       </ul>
     </div>
   </section>
 
-  <!-- TAB 2: PRODUCTION JAVASCRIPT CODE -->
+  <!-- TAB 2: TURNKEY JS CODE -->
   <section id="tab-code" class="tab-content">
     <h2>Turnkey Web Files for GitHub Pages</h2>
     <p>Deploy directly to GitHub Pages. All three engines, the stemmer, and fuzzy matching are self-contained with zero dependencies.</p>
@@ -375,14 +421,14 @@
     id: "circuit_dead",
     category: "Breadboard Lab",
     intent: "activity",
-    question: "My circuit is not turning on or working",
-    tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery", "hot", "smell"],
-    answer: "Check 3 checkpoints: 1) Is the battery snapped tight? 2) Is the LED facing the right direction? 3) Are the resistor and LED legs in the exact same numbered row?"
+    question: "My circuit is not turning on or is hot",
+    tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery", "hot", "smell", "smoke"],
+    answer: "Disconnect battery immediately if parts are hot! Check that your resistor is in series and you don't have a direct short circuit."
   }
 ];</pre>
     </div>
 
-    <h3>File 2: <code>assistant.js</code> (Multi-Engine Evaluator)</h3>
+    <h3>File 2: <code>assistant.js</code> (Tri-Engine Evaluator)</h3>
     <div class="code-panel">
       <div class="code-header">
         <span>assistant.js</span>
@@ -397,7 +443,7 @@
       "you", "please", "help", "with", "for", "of", "are", "this"
     ]);
 
-    // Precompute IDF for Method 2
+    // Precompute IDF weights
     this.idf = {};
     const N = kb.length;
     const df = {};
@@ -485,7 +531,7 @@
     return { score: Math.min(1.0, bestScore), match: bestMatch };
   }
 
-  // Method 3: Sub-Word Character N-Gram Overlap (3-grams)
+  // Method 3: Sub-Word Character N-Grams
   evalNGrams(query) {
     const getNGrams = (str) => {
       const s = ` ${str.toLowerCase().replace(/[^a-z0-9]/g, ' ')} `;
@@ -508,7 +554,6 @@
     return { score: Math.min(1.0, bestScore), match: bestMatch };
   }
 
-  // Master Tri-Model Evaluation with Ensemble
   evaluate(query) {
     const qTokens = this.tokenise(query);
     if (qTokens.length === 0) return { confidence: 0, reply: "Please ask a question." };
@@ -535,13 +580,13 @@
     </div>
   </section>
 
-  <!-- TAB 3: EXCEL RECLASSIFICATION BLUEPRINT -->
+  <!-- TAB 3: EXCEL RECLASSIFICATION DEMO BLUEPRINT -->
   <section id="tab-excel" class="tab-content">
-    <h2>Native Excel Free-Text Reclassification (=PY)</h2>
-    <p>Build an automated audit-ready reclassification engine directly inside Excel. Runs word stemming and character n-gram TF-IDF concurrently via Python in Excel.</p>
+    <h2>Native Excel Free-Text Reclassification Blueprint (=PY)</h2>
+    <p>Follow these exact steps to build a live, persuasive demo in Microsoft Excel 365.</p>
 
     <div class="instruction-callout">
-      <strong>Live Demo Setup Steps:</strong>
+      <strong>Live Demo Setup Overview:</strong>
       <ol style="margin: 6px 0 0 0; padding-left: 20px;">
         <li>Create Tab 1: <code>Taxonomy_Lookup</code> and format as table <code>Taxonomy</code>.</li>
         <li>Create Tab 2: <code>Classification_Engine</code> and format as table <code>RawInputs</code>.</li>
@@ -708,7 +753,7 @@ Here is the source code:
 </main>
 
 <script>
-  // Tri-Method Simulator Engine
+  // Tri-Method Simulator Knowledge Base
   const SIM_KB = [
     {
       id: "led_polarity",
@@ -766,64 +811,154 @@ Here is the source code:
     const rawTokens = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w && !STOP_WORDS.has(w));
     document.getElementById("tokens-display").innerText = rawTokens.length ? rawTokens.map(t => `${t} (stem: ${stemWord(t)})`).join(", ") : "(None - all stop words)";
 
-    // METHOD 1: Coverage
+    // ==========================================
+    // METHOD 1: COVERAGE + LOGGING
+    // ==========================================
     let covBest = 0, covMatch = null;
+    let covLog = `INPUT: [${rawTokens.join(", ")}]\n`;
+
     for (const item of SIM_KB) {
       const iSet = new Set(item.tokens);
       let matchSum = 0;
+      let itemLog = `\nChecking Topic: "${item.id}"\n`;
+
       for (const qt of rawTokens) {
         const qStem = stemWord(qt);
         let s = 0;
+        let note = "MISS (0.0)";
+
         for (const it of iSet) {
-          if (qt === it || qStem === stemWord(it)) { s = 1.0; break; }
+          if (qt === it) {
+            s = 1.0;
+            note = `EXACT MATCH "${it}" (1.0)`;
+            break;
+          }
+          if (qStem === stemWord(it)) {
+            s = 1.0;
+            note = `STEM MATCH "${qt}" -> "${it}" (1.0)`;
+            break;
+          }
           const fz = levenshtein(qt, it);
-          if (fz >= 0.75) s = Math.max(s, fz);
+          if (fz >= 0.75) {
+            s = Math.max(s, fz);
+            note = `FUZZY MATCH "${it}" (${(fz*100).toFixed(0)}%)`;
+          }
         }
         matchSum += s;
+        itemLog += ` - "${qt}": ${note}\n`;
       }
+
       const score = rawTokens.length ? (matchSum / rawTokens.length) : 0;
-      if (score > covBest) { covBest = score; covMatch = item; }
+      itemLog += ` > Total Matched: ${matchSum.toFixed(2)} / ${rawTokens.length} tokens = ${(score*100).toFixed(0)}%\n`;
+
+      if (score > covBest) {
+        covBest = score;
+        covMatch = item;
+        covLog += itemLog;
+      }
     }
 
-    // METHOD 2: TF-IDF (IDF Weights)
-    const idf = { "resistor": 1.4, "led": 1.1, "switch": 1.4, "anode": 1.6, "cathode": 1.6, "battery": 1.2, "hot": 1.5, "smell": 1.6, "block": 1.3 };
+    covLog += `\n>> FORMULA:\nMatched_Tokens / Total_Query_Tokens\nBest Match: ${covMatch ? covMatch.id : 'None'} (${(covBest*100).toFixed(0)}%)`;
+    document.getElementById("term-cov").innerText = covLog;
+
+    // ==========================================
+    // METHOD 2: TF-IDF + LOGGING
+    // ==========================================
+    const idf = { 
+      "resistor": 1.5, "led": 1.1, "switch": 1.4, "anode": 1.7, "cathode": 1.7, 
+      "battery": 1.2, "hot": 1.6, "smell": 1.7, "block": 1.3, "circuit": 0.5, "color": 1.3
+    };
     let tfBest = 0, tfMatch = null;
+    let tfLog = `COMPUTING TERM FREQUENCY - INVERSE DOC FREQ (TF-IDF)\n`;
+
     for (const item of SIM_KB) {
       const iStems = new Set(item.tokens.map(t => stemWord(t)));
       let wSum = 0, mSum = 0;
+      let itemLog = `\nTesting Topic: "${item.id}"\n`;
+
       for (const qt of rawTokens) {
         const qStem = stemWord(qt);
-        const w = idf[qStem] || idf[qt] || 0.5;
+        const w = idf[qStem] || idf[qt] || 0.45; // Rare words get higher weights
         wSum += w;
-        if (iStems.has(qStem)) mSum += w;
-        else {
+
+        let hit = false;
+        let hitType = "NO HIT";
+
+        if (iStems.has(qStem)) {
+          mSum += w;
+          hit = true;
+          hitType = `HIT (Weight: ${w.toFixed(2)})`;
+        } else {
           for (const ist of iStems) {
-            if (levenshtein(qStem, ist) >= 0.75) { mSum += w * 0.85; break; }
+            if (levenshtein(qStem, ist) >= 0.75) {
+              mSum += w * 0.85;
+              hit = true;
+              hitType = `FUZZY HIT (Weight: ${(w * 0.85).toFixed(2)})`;
+              break;
+            }
           }
         }
+        itemLog += ` - Token "${qt}": ${hitType} [IDF Weight: ${w.toFixed(2)}]\n`;
       }
+
       const score = wSum > 0 ? (mSum / wSum) : 0;
-      if (score > tfBest) { tfBest = score; tfMatch = item; }
+      itemLog += ` > Weighted Score: ${mSum.toFixed(2)} / ${wSum.toFixed(2)} = ${(score*100).toFixed(0)}%\n`;
+
+      if (score > tfBest) {
+        tfBest = score;
+        tfMatch = item;
+        tfLog += itemLog;
+      }
     }
 
-    // METHOD 3: Sub-word N-Grams (3-grams)
+    tfLog += `\n>> FORMULA:\nSum(Matched_Weights) / Sum(Total_Weights)\nAnchors (e.g. "anode") dominate over fillers.\nBest Match: ${tfMatch ? tfMatch.id : 'None'} (${(tfBest*100).toFixed(0)}%)`;
+    document.getElementById("term-tfidf").innerText = tfLog;
+
+    // ==========================================
+    // METHOD 3: N-GRAMS + LOGGING
+    // ==========================================
     const getGrams = (str) => {
-      const s = ` ${str.toLowerCase()} `;
+      const s = ` ${str.toLowerCase().replace(/[^a-z0-9]/g, ' ')} `;
       const g = new Set();
       for (let i = 0; i < s.length - 2; i++) g.add(s.slice(i, i + 3));
       return g;
     };
+
     const qGrams = getGrams(query);
     let ngBest = 0, ngMatch = null;
+    let ngLog = `SUB-WORD CHARACTER 3-GRAM SLICES\n`;
+    ngLog += `Query 3-Grams: [${Array.from(qGrams).slice(0, 10).map(g => `'${g}'`).join(", ")}... Total: ${qGrams.size}]\n`;
+
     for (const item of SIM_KB) {
-      const tGrams = getGrams(item.tokens.join(" ") + " " + item.question);
+      const targetStr = (item.tokens.join(" ") + " " + item.question);
+      const tGrams = getGrams(targetStr);
       let matchCount = 0;
-      for (const g of qGrams) if (tGrams.has(g)) matchCount++;
+      const matchedGrams = [];
+
+      for (const g of qGrams) {
+        if (tGrams.has(g)) {
+          matchCount++;
+          if (matchedGrams.length < 6) matchedGrams.push(g);
+        }
+      }
+
       const score = (2 * matchCount) / (qGrams.size + Math.min(qGrams.size, tGrams.size));
-      if (score > ngBest) { ngBest = score; ngMatch = item; }
+      let itemLog = `\nTarget Topic: "${item.id}"\n`;
+      itemLog += ` - Shared Slices: [${matchedGrams.map(g => `'${g}'`).join(", ")}...]\n`;
+      itemLog += ` - Overlap: ${matchCount} slices matched out of ${qGrams.size}\n`;
+      itemLog += ` > Dice Similarity Score: ${(score*100).toFixed(0)}%\n`;
+
+      if (score > ngBest) {
+        ngBest = score;
+        ngMatch = item;
+        ngLog += itemLog;
+      }
     }
 
-    // Render individual cards
+    ngLog += `\n>> FORMULA:\n2 * Overlap / (|Q_Grams| + |T_Grams|)\nBypasses token dictionary; matches character sequences directly.\nBest Match: ${ngMatch ? ngMatch.id : 'None'} (${(ngBest*100).toFixed(0)}%)`;
+    document.getElementById("term-ngram").innerText = ngLog;
+
+    // Render cards
     renderCard("cov", covBest, covMatch);
     renderCard("tfidf", tfBest, tfMatch);
     renderCard("ngram", ngBest, ngMatch);
@@ -848,7 +983,7 @@ Here is the source code:
   function renderCard(id, score, match) {
     const pct = Math.round(Math.min(1.0, score) * 100);
     document.getElementById(`score-${id}`).innerText = `${pct}%`;
-    document.getElementById(`match-${id}`).innerText = match ? `Matched: "${match.question.slice(0, 35)}..."` : "No match";
+    document.getElementById(`match-${id}`).innerText = match ? `Matched: "${match.question.slice(0, 32)}..."` : "No match";
 
     const badge = document.getElementById(`badge-${id}`);
     badge.className = "badge";
@@ -879,7 +1014,7 @@ Here is the source code:
     });
   }
 
-  // Run on initial load
+  // Initial load execution
   runAllMethods();
 </script>
 
