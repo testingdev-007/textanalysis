@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STEM Assistant & Excel Reclassification Workbench</title>
+  <title>STEM NLP Engine & Excel Reclassification Workbench</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -66,7 +66,7 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Simulator Styling */
+    /* Simulator Box */
     .simulator-box {
       background: var(--card);
       border: 1px solid var(--border);
@@ -108,20 +108,42 @@
     }
     .chip:hover { border-color: var(--accent); color: #fff; }
 
-    .metrics-grid {
+    /* 3-Method Comparator Grid */
+    .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
       margin-top: 20px;
     }
-    .metric-card {
+    .method-card {
       background: #141f33;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .metric-card h4 { margin: 0 0 6px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; }
-    .metric-card .score { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+    .method-card h4 {
+      margin: 0 0 4px 0;
+      font-size: 13px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .method-card .desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      min-height: 28px;
+    }
+    .score-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .score { font-size: 32px; font-weight: 800; }
     .badge {
       display: inline-block;
       font-size: 11px;
@@ -132,6 +154,15 @@
     .badge-high { background: #14532d; color: #86efac; }
     .badge-med { background: #713f12; color: #fde047; }
     .badge-low { background: #7f1d1d; color: #fca5a5; }
+    .matched-topic { font-size: 12px; color: #cbd5e1; margin-top: 8px; }
+
+    .ensemble-banner {
+      margin-top: 20px;
+      background: #0b1120;
+      border: 1px solid #2563eb;
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
 
     /* Code Panels */
     .code-panel {
@@ -184,7 +215,6 @@
       margin: 16px 0;
     }
 
-    /* Table styles for worked examples */
     table.data-preview {
       width: 100%;
       border-collapse: collapse;
@@ -200,78 +230,115 @@
       background: #141f33;
       color: var(--accent);
     }
-    table.data-preview tr:nth-child(even) {
-      background: #131d31;
-    }
+    table.data-preview tr:nth-child(even) { background: #131d31; }
   </style>
 </head>
 <body>
 
 <header>
   <h1>STEM Activity Support & Reclassification Workbench</h1>
-  <p>Self-Contained Suite: Client-Side Web Assistant Engine & Native Excel Free-Text Classifier (=PY)</p>
+  <p>Tri-Model NLP Comparator (Coverage, TF-IDF, Semantic Cosine) with Word Families & Fuzzy Typo-Tolerance</p>
 </header>
 
 <nav>
-  <button class="active" onclick="showTab('tab-simulator')">1. Live Web Assistant & Logic Simulator</button>
-  <button onclick="showTab('tab-code')">2. Complete Web Code (Drop into GitHub Pages)</button>
-  <button onclick="showTab('tab-excel')">3. Excel Reclassification (=PY Live Demo)</button>
-  <button onclick="showTab('tab-prompts')">4. Gemini Prompts for Your STEM Sites</button>
+  <button class="active" onclick="showTab('tab-simulator')">1. Tri-Method Logic Simulator</button>
+  <button onclick="showTab('tab-code')">2. Complete Web Code (GitHub Pages)</button>
+  <button onclick="showTab('tab-excel')">3. Excel Reclassification (=PY Demo)</button>
+  <button onclick="showTab('tab-prompts')">4. Gemini Prompts for STEM Sites</button>
 </nav>
 
 <main>
 
-  <!-- TAB 1: SIMULATOR -->
+  <!-- TAB 1: TRI-METHOD SIMULATOR -->
   <section id="tab-simulator" class="tab-content active">
-    <h2>Interactive Confidence & Tokenization Simulator</h2>
-    <p>Test queries against this simulation breadboard activity. It runs client-side Porter stemming (e.g., <em>blocking</em> &rarr; <em>block</em>) and Levenshtein typo-tolerance (e.g., <em>resister</em> &rarr; <em>resistor</em>) in real time.</p>
+    <h2>Real-Time Cross-Comparison of the 3 Methods</h2>
+    <p>Every test query is evaluated concurrently by all three mathematical models. Notice how each model reacts differently to typos (<em>resister</em>), word stems (<em>blocking</em>), and out-of-scope questions.</p>
 
     <div class="simulator-box">
       <div class="test-chips">
         <span style="font-size: 12px; color: var(--muted); align-self: center; margin-right: 4px;">Quick tests:</span>
-        <button class="chip" onclick="setSim('Which leg of the LED is positive?')">LED Positive Leg</button>
-        <button class="chip" onclick="setSim('My resister is smoking and wrong')">Typo: "resister"</button>
-        <button class="chip" onclick="setSim('The wire is totally blocking the switch')">Stemming: "blocking"</button>
-        <button class="chip" onclick="setSim('What are the colours on the bands?')">Resistor Colours</button>
-        <button class="chip" onclick="setSim('Can I go get a glass of water?')">Irrelevant Question</button>
+        <button class="chip" onclick="setSim('Which leg of the LED is positive?')">1. LED Polarity (Exact Match)</button>
+        <button class="chip" onclick="setSim('My resister is smoking and hot')">2. Typo: "resister" + "hot"</button>
+        <button class="chip" onclick="setSim('The wire is blocking the switch')">3. Stemming: "blocking"</button>
+        <button class="chip" onclick="setSim('Is this safe to touch?')">4. False Positive Trap ("safe")</button>
+        <button class="chip" onclick="setSim('Can I go get a glass of water?')">5. Out-of-Scope (0% Check)</button>
       </div>
 
       <div class="input-row">
-        <input type="text" id="sim-input" placeholder="Type a question a student might ask..." value="Which leg of the LED is positive?" />
-        <button class="action-btn" onclick="runSimulation()">Evaluate</button>
+        <input type="text" id="sim-input" placeholder="Type a student question..." value="Which leg of the LED is positive?" />
+        <button class="action-btn" onclick="runAllMethods()">Evaluate Query</button>
       </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <h4>Normalized Tokens Extracted</h4>
-          <div id="sim-tokens" style="font-family: monospace; font-size: 13px; color: var(--accent); min-height: 38px;">-</div>
-          <span style="font-size: 11px; color: var(--muted)">Punctuation, stems & stop words processed</span>
+      <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
+        Extracted Tokens & Stems: <code id="tokens-display" style="color: var(--accent); font-size: 13px;">-</code>
+      </div>
+
+      <!-- 3 CARDS SIDE-BY-SIDE -->
+      <div class="grid-3">
+        <!-- METHOD 1 -->
+        <div class="method-card">
+          <div>
+            <h4>Method 1: Query Coverage</h4>
+            <div class="desc">Stemmed token overlap ratio + Levenshtein fuzzy bonus. Answers: <em>"Did we hit the student's words?"</em></div>
+            <div class="score-row">
+              <span id="score-cov" class="score">-%</span>
+              <span id="badge-cov" class="badge">Awaiting</span>
+            </div>
+          </div>
+          <div class="matched-topic" id="match-cov">Matched: -</div>
         </div>
 
-        <div class="metric-card">
-          <h4>Calculated Confidence</h4>
-          <div id="sim-score" class="score">-%</div>
-          <div id="sim-badge" class="badge">Awaiting test</div>
+        <!-- METHOD 2 -->
+        <div class="method-card">
+          <div>
+            <h4>Method 2: TF-IDF Term Weighting</h4>
+            <div class="desc">Inverse Document Frequency. Rewards rare anchor nouns (<em>resistor</em>); penalizes ubiquitous words.</div>
+            <div class="score-row">
+              <span id="score-tfidf" class="score">-%</span>
+              <span id="badge-tfidf" class="badge">Awaiting</span>
+            </div>
+          </div>
+          <div class="matched-topic" id="match-tfidf">Matched: -</div>
         </div>
 
-        <div class="metric-card">
-          <h4>Matched Topic</h4>
-          <div id="sim-match" style="font-size: 13px; font-weight: 600; color: #fff; min-height: 38px;">-</div>
-          <span id="sim-intent" style="font-size: 11px; color: var(--muted)">Intent: None</span>
+        <!-- METHOD 3 -->
+        <div class="method-card">
+          <div>
+            <h4>Method 3: Character N-Gram Cosine</h4>
+            <div class="desc">Sub-word string slice similarity (3-5 char windows). Inherently bridges typos and suffixes mathematically.</div>
+            <div class="score-row">
+              <span id="score-ngram" class="score">-%</span>
+              <span id="badge-ngram" class="badge">Awaiting</span>
+            </div>
+          </div>
+          <div class="matched-topic" id="match-ngram">Matched: -</div>
         </div>
       </div>
 
-      <div style="margin-top: 20px; background: #0b1120; border-radius: 8px; padding: 14px 18px;">
-        <strong style="font-size: 13px; color: var(--accent); text-transform: uppercase;">Assistant Response Output:</strong>
-        <div id="sim-reply" style="margin-top: 6px; font-size: 14px; color: #e2e8f0;">Click Evaluate to simulate the response.</div>
+      <!-- CONSENSUS -->
+      <div class="ensemble-banner">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="font-size: 13px; color: var(--accent); text-transform: uppercase;">Ensemble Consensus Verdict (30% Cov + 40% TF-IDF + 30% N-Gram):</strong>
+          <span id="consensus-score" style="font-size: 18px; font-weight: 800; color: #fff;">-%</span>
+        </div>
+        <div id="consensus-reply" style="font-size: 14px; color: #e2e8f0;">Run a query to view the generated instruction.</div>
       </div>
+    </div>
+
+    <div class="instruction-callout">
+      <strong>Why compare all three?</strong>
+      <ul>
+        <li><strong>Method 1 (Coverage)</strong> is intuitive, but can yield false positives if an unrelated question happens to include one lab term.</li>
+        <li><strong>Method 2 (TF-IDF)</strong> protects against false positives by heavily discounting common words and anchoring only on technical lab terminology.</li>
+        <li><strong>Method 3 (N-Grams)</strong> prevents failures caused by student typos (e.g. <em>"resister"</em> or <em>"breadbord"</em>) without needing a huge manual misspelling dictionary.</li>
+      </ul>
     </div>
   </section>
 
-  <!-- TAB 2: COMPLETE WEB CODE -->
+  <!-- TAB 2: PRODUCTION JAVASCRIPT CODE -->
   <section id="tab-code" class="tab-content">
     <h2>Turnkey Web Files for GitHub Pages</h2>
-    <p>These static files run directly in student browsers with no backend, server, or API keys.</p>
+    <p>Deploy directly to GitHub Pages. All three engines, the stemmer, and fuzzy matching are self-contained with zero dependencies.</p>
 
     <h3>File 1: <code>knowledge.js</code></h3>
     <div class="code-panel">
@@ -286,36 +353,36 @@
     intent: "activity",
     question: "Which leg of the LED is positive?",
     tokens: ["led", "leg", "legs", "long", "short", "anode", "cathode", "positive", "negative"],
-    answer: "Remember polarity! The longer leg is the positive anode (connects toward battery +). The shorter leg with the flat notch on the casing is the cathode (-)."
+    answer: "Remember polarity! The longer leg is the positive anode (connects towards battery +). The shorter leg with the flat notch is the cathode (-)."
   },
   {
     id: "resistor_value",
     category: "Breadboard Lab",
     intent: "subject",
-    question: "What resistor do I use?",
-    tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330"],
+    question: "What resistor do I use and what are the colours?",
+    tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330", "red", "brown"],
     answer: "Use the 220-ohm resistor (Red-Red-Brown bands). If you skip the resistor, the LED will draw excess current and burn out."
   },
   {
     id: "switch_wiring",
     category: "Breadboard Lab",
     intent: "activity",
-    question: "How do I connect the switch?",
-    tokens: ["switch", "button", "wire", "pins", "block", "blocked", "press", "divider"],
+    question: "How do I connect the switch and what is blocking it?",
+    tokens: ["switch", "button", "wire", "pins", "block", "blocked", "blocking", "divider", "press"],
     answer: "Mount the switch across the center divider trench of the breadboard so the terminals don't bridge together. Connect one pin to the power rail and the opposite to your resistor."
   },
   {
     id: "circuit_dead",
     category: "Breadboard Lab",
     intent: "activity",
-    question: "My circuit is not turning on",
-    tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery"],
-    answer: "Check 3 checkpoints: 1) Is the 9V battery snapped tight? 2) Is the LED facing the right direction? 3) Are the resistor and LED legs in the exact same numbered row?"
+    question: "My circuit is not turning on or working",
+    tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery", "hot", "smell"],
+    answer: "Check 3 checkpoints: 1) Is the battery snapped tight? 2) Is the LED facing the right direction? 3) Are the resistor and LED legs in the exact same numbered row?"
   }
 ];</pre>
     </div>
 
-    <h3>File 2: <code>assistant.js</code></h3>
+    <h3>File 2: <code>assistant.js</code> (Multi-Engine Evaluator)</h3>
     <div class="code-panel">
       <div class="code-header">
         <span>assistant.js</span>
@@ -327,112 +394,154 @@
     this.stopWords = new Set([
       "a", "an", "the", "is", "it", "my", "me", "i", "to", "in", "on", "at",
       "do", "does", "did", "how", "what", "why", "where", "which", "can",
-      "you", "please", "help", "with", "for", "of", "are"
+      "you", "please", "help", "with", "for", "of", "are", "this"
     ]);
+
+    // Precompute IDF for Method 2
+    this.idf = {};
+    const N = kb.length;
+    const df = {};
+    for (const item of kb) {
+      const uTokens = new Set(item.tokens.map(t => this.stem(t)));
+      for (const t of uTokens) df[t] = (df[t] || 0) + 1;
+    }
+    for (const t in df) {
+      this.idf[t] = Math.log(1 + (N - df[t] + 0.5) / (df[t] + 0.5));
+    }
   }
 
-  stem(word) {
-    if (word.length < 4) return word;
-    return word
-      .replace(/(ing|edly|ingly|ed)$/, '')
-      .replace(/(ies|es|s)$/, '')
-      .replace(/(tion|tional|ations)$/, 't')
-      .replace(/(ment|ness|able|ible)$/, '');
+  stem(w) {
+    if (w.length < 4) return w;
+    return w.replace(/(ing|edly|ingly|ed)$/, '')
+            .replace(/(ies|es|s)$/, '')
+            .replace(/(tion|tional|ations)$/, 't');
   }
 
-  fuzzySimilarity(a, b) {
+  levenshtein(a, b) {
     if (a === b) return 1.0;
     const la = a.length, lb = b.length;
     if (Math.abs(la - lb) > 2) return 0.0;
-
-    const matrix = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
-    for (let i = 0; i <= la; i++) matrix[i][0] = i;
-    for (let j = 0; j <= lb; j++) matrix[0][j] = j;
-
+    const m = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
+    for (let i = 0; i <= la; i++) m[i][0] = i;
+    for (let j = 0; j <= lb; j++) m[0][j] = j;
     for (let i = 1; i <= la; i++) {
       for (let j = 1; j <= lb; j++) {
         const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        );
+        m[i][j] = Math.min(m[i-1][j] + 1, m[i][j-1] + 1, m[i-1][j-1] + cost);
       }
     }
-    return 1.0 - (matrix[la][lb] / Math.max(la, lb));
+    return 1.0 - (m[la][lb] / Math.max(la, lb));
   }
 
   tokenise(text) {
-    return text
-      .toLowerCase()
+    return text.toLowerCase()
       .replace(/[^a-z0-9\s]/g, "")
       .split(/\s+/)
       .filter(t => t.length > 1 && !this.stopWords.has(t));
   }
 
-  matchToken(qToken, itemSet) {
-    const qStem = this.stem(qToken);
-    for (const it of itemSet) {
-      if (qToken === it || qStem === this.stem(it)) return 1.0;
-    }
-    for (const it of itemSet) {
-      const sim = this.fuzzySimilarity(qToken, it);
-      if (sim >= 0.75) return sim;
-    }
-    return 0.0;
-  }
-
-  evaluate(query) {
-    const qTokens = this.tokenise(query);
-    if (qTokens.length === 0) return { confidence: 0, match: null, reply: "Please type a question." };
-
-    let bestScore = 0;
-    let bestMatch = null;
-
+  // Method 1: Stemmed Coverage + Levenshtein
+  evalCoverage(qTokens) {
+    let bestScore = 0, bestMatch = null;
     for (const item of this.kb) {
       const itemSet = new Set(item.tokens);
-      let matchSum = 0;
-
-      for (const t of qTokens) {
-        matchSum += this.matchToken(t, itemSet);
+      let matchCount = 0;
+      for (const qt of qTokens) {
+        const qStem = this.stem(qt);
+        let s = 0;
+        for (const it of itemSet) {
+          if (qt === it || qStem === this.stem(it)) { s = 1.0; break; }
+          const fz = this.levenshtein(qt, it);
+          if (fz >= 0.75) s = Math.max(s, fz);
+        }
+        matchCount += s;
       }
+      const score = matchCount / qTokens.length;
+      if (score > bestScore) { bestScore = score; bestMatch = item; }
+    }
+    return { score: Math.min(1.0, bestScore), match: bestMatch };
+  }
 
-      const score = matchSum / qTokens.length;
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = item;
+  // Method 2: Stemmed TF-IDF
+  evalTfIdf(qTokens) {
+    let bestScore = 0, bestMatch = null;
+    for (const item of this.kb) {
+      const itemStems = new Set(item.tokens.map(t => this.stem(t)));
+      let weightSum = 0, matchWeight = 0;
+      for (const qt of qTokens) {
+        const qStem = this.stem(qt);
+        const w = this.idf[qStem] || 0.4;
+        weightSum += w;
+        if (itemStems.has(qStem)) matchWeight += w;
+        else {
+          for (const ist of itemStems) {
+            if (this.levenshtein(qStem, ist) >= 0.75) { matchWeight += w * 0.85; break; }
+          }
+        }
       }
+      const score = weightSum > 0 ? (matchWeight / weightSum) : 0;
+      if (score > bestScore) { bestScore = score; bestMatch = item; }
     }
+    return { score: Math.min(1.0, bestScore), match: bestMatch };
+  }
 
-    const confidence = parseFloat(Math.min(1.0, bestScore).toFixed(2));
+  // Method 3: Sub-Word Character N-Gram Overlap (3-grams)
+  evalNGrams(query) {
+    const getNGrams = (str) => {
+      const s = ` ${str.toLowerCase().replace(/[^a-z0-9]/g, ' ')} `;
+      const grams = new Set();
+      for (let i = 0; i < s.length - 2; i++) grams.add(s.slice(i, i + 3));
+      return grams;
+    };
+    const qGrams = getNGrams(query);
+    if (qGrams.size === 0) return { score: 0, match: null };
 
-    if (confidence >= 0.40) {
-      return { confidence, match: bestMatch, reply: bestMatch.answer };
-    } else if (confidence >= 0.20) {
-      return {
-        confidence,
-        match: bestMatch,
-        reply: `Are you asking about "${bestMatch.question}"? If so: ${bestMatch.answer}`
-      };
-    } else {
-      return {
-        confidence,
-        match: null,
-        reply: "I'm not sure about that. Try rephrasing or raise your hand for classroom support!"
-      };
+    let bestScore = 0, bestMatch = null;
+    for (const item of this.kb) {
+      const targetStr = (item.tokens.join(" ") + " " + item.question);
+      const tGrams = getNGrams(targetStr);
+      let overlap = 0;
+      for (const g of qGrams) if (tGrams.has(g)) overlap++;
+      const score = (2 * overlap) / (qGrams.size + Math.min(qGrams.size, tGrams.size));
+      if (score > bestScore) { bestScore = score; bestMatch = item; }
     }
+    return { score: Math.min(1.0, bestScore), match: bestMatch };
+  }
+
+  // Master Tri-Model Evaluation with Ensemble
+  evaluate(query) {
+    const qTokens = this.tokenise(query);
+    if (qTokens.length === 0) return { confidence: 0, reply: "Please ask a question." };
+
+    const cov = this.evalCoverage(qTokens);
+    const tf = this.evalTfIdf(qTokens);
+    const ng = this.evalNGrams(query);
+
+    const ensemble = (0.30 * cov.score) + (0.40 * tf.score) + (0.30 * ng.score);
+    const topMatch = tf.match || cov.match || ng.match;
+
+    return {
+      ensemble: parseFloat(ensemble.toFixed(2)),
+      coverage: cov,
+      tfidf: tf,
+      ngram: ng,
+      match: topMatch,
+      reply: ensemble >= 0.40 ? topMatch.answer :
+             ensemble >= 0.20 ? `Are you asking about "${topMatch.question}"? ${topMatch.answer}` :
+             "I'm not sure about that. Please ask your teacher or check the activity guide!"
+    };
   }
 }</pre>
     </div>
   </section>
 
-  <!-- TAB 3: EXCEL RECLASSIFICATION DEMO BLUEPRINT -->
+  <!-- TAB 3: EXCEL RECLASSIFICATION BLUEPRINT -->
   <section id="tab-excel" class="tab-content">
-    <h2>Native Excel Free-Text Reclassification Blueprint (=PY)</h2>
-    <p>Follow these exact steps to build a live, persuasive demo in Microsoft Excel 365.</p>
+    <h2>Native Excel Free-Text Reclassification (=PY)</h2>
+    <p>Build an automated audit-ready reclassification engine directly inside Excel. Runs word stemming and character n-gram TF-IDF concurrently via Python in Excel.</p>
 
     <div class="instruction-callout">
-      <strong>Live Demo Setup Overview:</strong>
+      <strong>Live Demo Setup Steps:</strong>
       <ol style="margin: 6px 0 0 0; padding-left: 20px;">
         <li>Create Tab 1: <code>Taxonomy_Lookup</code> and format as table <code>Taxonomy</code>.</li>
         <li>Create Tab 2: <code>Classification_Engine</code> and format as table <code>RawInputs</code>.</li>
@@ -440,13 +549,10 @@
       </ol>
     </div>
 
-    <!-- Step 1: Taxonomy Table -->
-    <h3>Step 1: Populate Master Taxonomy (Tab: <code>Taxonomy_Lookup</code>)</h3>
-    <p>Copy this TSV block, paste into cell <strong>A1</strong> of a new sheet, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>Taxonomy</code></strong>.</p>
-    
+    <h3>Step 1: Master Taxonomy Table (Tab: <code>Taxonomy_Lookup</code>)</h3>
     <div class="code-panel">
       <div class="code-header">
-        <span>Tab: Taxonomy_Lookup | Paste into A1 (TSV Format)</span>
+        <span>Paste into Cell A1 &rarr; Press Ctrl+T &rarr; Name table 'Taxonomy'</span>
         <button class="copy-btn" onclick="copyCode('tsv-taxonomy')">Copy Taxonomy Data</button>
       </div>
       <pre id="tsv-taxonomy">Category	Keywords	Description
@@ -456,13 +562,10 @@ Curriculum	hypothesis method independent dependent control variable measurement 
 Safety	burn hot smell smoke goggles hazard shock caution danger protect	Classroom safety equipment rules hazards heat warnings and physical risk management</pre>
     </div>
 
-    <!-- Step 2: Raw Inputs Table -->
-    <h3>Step 2: Populate Raw Free-Text Inputs (Tab: <code>Classification_Engine</code>)</h3>
-    <p>Copy this TSV block, paste into cell <strong>A1</strong> of your test sheet, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>RawInputs</code></strong>.</p>
-    
+    <h3>Step 2: Unlabelled Raw Inputs Table (Tab: <code>Classification_Engine</code>)</h3>
     <div class="code-panel">
       <div class="code-header">
-        <span>Tab: Classification_Engine | Paste into A1 (TSV Format)</span>
+        <span>Paste into Cell A1 &rarr; Press Ctrl+T &rarr; Name table 'RawInputs'</span>
         <button class="copy-btn" onclick="copyCode('tsv-rawinputs')">Copy Test Inputs</button>
       </div>
       <pre id="tsv-rawinputs">FreeText
@@ -474,10 +577,7 @@ Can I go get my water bottle from my locker?
 The battery clip won't snap onto the breadbord</pre>
     </div>
 
-    <!-- Step 3: Python Script -->
-    <h3>Step 3: The Live Classification Formula (Paste into Cell <code>B2</code>)</h3>
-    <p>Click cell <strong>B2</strong>, type <code>=PY</code>, press <kbd>Tab</kbd>, paste the code below, and hit <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</p>
-
+    <h3>Step 3: Drop the Python Formula into Cell <code>B2</code></h3>
     <div class="code-panel">
       <div class="code-header">
         <span>Excel Python Formula (=PY)</span>
@@ -500,7 +600,7 @@ categories = tax_df['Category'].tolist()
 target_corpus = (tax_df['Keywords'].fillna("") + " " + tax_df['Description'].fillna("")).tolist()
 raw_texts = raw_df['FreeText'].fillna("").tolist()
 
-# 2. Preprocess: Stemming word families (block, blocking, blocked -> block)
+# 2. Preprocessing & Porter Stemmer (word families: block, blocked, blocking -> block)
 def preprocess(text):
     words = re.findall(r'[a-zA-Z]+', str(text).lower())
     stops = {"a", "an", "the", "is", "it", "my", "to", "in", "on", "do", "how", "what", "why", "of", "and", "from"}
@@ -509,20 +609,20 @@ def preprocess(text):
 stemmed_targets = [preprocess(t) for t in target_corpus]
 stemmed_raw = [preprocess(r) for r in raw_texts]
 
-# Method A: Stemmed Word-Level TF-IDF (Captures Word Families)
+# Method A: Stemmed Word-Level TF-IDF (Word Families)
 word_vec = TfidfVectorizer(ngram_range=(1, 2))
 word_vec.fit(stemmed_targets + stemmed_raw)
 word_sim = cosine_similarity(word_vec.transform(stemmed_raw), word_vec.transform(stemmed_targets))
 
-# Method B: Sub-word Character N-Grams (Typo & Misspelling Resilient)
+# Method B: Sub-Word Character N-Grams (Typo & Misspelling Resilient)
 char_vec = TfidfVectorizer(analyzer='char_wb', ngram_range=(3, 5))
 char_vec.fit(target_corpus + raw_texts)
 char_sim = cosine_similarity(char_vec.transform(raw_texts), char_vec.transform(target_corpus))
 
-# Method C: Ensemble Blend (50% Word-Stem + 50% Typo Sub-Word)
+# Method C: Ensemble Blend (50% Stemmed Word + 50% Typo Sub-Word)
 ensemble = (0.5 * word_sim) + (0.5 * char_sim)
 
-# 3. Output Assembly with Action Thresholds
+# 3. Assemble Output with Thresholds
 results = []
 for i, scores in enumerate(ensemble):
     best_idx = int(np.argmax(scores))
@@ -546,12 +646,10 @@ for i, scores in enumerate(ensemble):
         "Action Status": action
     })
 
-# Return structured dataframe directly to grid
 pd.DataFrame(results)</pre>
     </div>
 
-    <!-- Step 4: Expected Demo Output -->
-    <h3>What Your Audience Will See Spilled in Columns B:F</h3>
+    <h3>Expected Output Spilled in Columns B:F</h3>
     <table class="data-preview">
       <thead>
         <tr>
@@ -571,21 +669,12 @@ pd.DataFrame(results)</pre>
         <tr><td><strong>Hardware</strong></td><td>64.1%</td><td>56.5%</td><td>71.7%</td><td>Automated Match</td></tr>
       </tbody>
     </table>
-
-    <div class="instruction-callout">
-      <strong>Persuasion Pitch Talking Points:</strong>
-      <ul>
-        <li><strong>Row 1 ("resister", "smells bad"):</strong> Catches typo via character n-grams and routes to <em>Safety / Hardware</em>.</li>
-        <li><strong>Row 2 ("blocking"):</strong> The word <em>"blocking"</em> isn't in Taxonomy; the Porter Stemmer equates it to <em>"block"</em>.</li>
-        <li><strong>Row 5 ("water bottle"):</strong> Real-world rejection. Scoring drops to 0.0%, preventing hallucinations.</li>
-      </ul>
-    </div>
   </section>
 
   <!-- TAB 4: GEMINI PROMPT TEMPLATES -->
   <section id="tab-prompts" class="tab-content">
     <h2>Gemini Prompts for Your STEM Resources</h2>
-    <p>Copy these prompts directly into Gemini whenever you build a new STEM activity to extract your <code>knowledge.js</code> automatically.</p>
+    <p>Paste these prompts directly into Gemini whenever you build a new STEM activity to extract your <code>knowledge.js</code> automatically.</p>
 
     <h3>Template 1: Full HTML/JS Site Ingestion</h3>
     <div class="code-panel">
@@ -614,151 +703,163 @@ Follow these strict specifications:
 Here is the source code:
 [PASTE YOUR HTML/JS HERE]</pre>
     </div>
-
-    <h3>Template 2: Turning a Lab Worksheet/Syllabus into Knowledge Entries</h3>
-    <div class="code-panel">
-      <div class="code-header">
-        <span>Prompt Template: Ingest Worksheet/Curriculum</span>
-        <button class="copy-btn" onclick="copyCode('prompt-2')">Copy Prompt</button>
-      </div>
-      <pre id="prompt-2">Here is the student instruction sheet and rubric for my upcoming STEM session.
-
-Transform this document into the structured `KNOWLEDGE_BASE` array for our classroom assistant:
-- Extract all key procedural checkpoints (Step 1, Step 2, etc.).
-- Generate anticipated questions where students frequently stall.
-- Provide targeted keyword tokens for each entry including common student colloquialisms.
-- Ensure the output is valid, copyable JavaScript starting with `const KNOWLEDGE_BASE = [ ... ];`.
-
-Content:
-[PASTE WORKSHEET / LAB INSTRUCTIONS HERE]</pre>
-    </div>
   </section>
 
 </main>
 
 <script>
-  // Embedded knowledge base for the simulator tab
+  // Tri-Method Simulator Engine
   const SIM_KB = [
     {
       id: "led_polarity",
-      intent: "activity",
       question: "Which leg of the LED is positive?",
       tokens: ["led", "leg", "legs", "long", "short", "anode", "cathode", "positive", "negative"],
       answer: "The longer leg is the positive anode (connects towards battery +). The shorter leg with the flat notch is the cathode (-)."
     },
     {
       id: "resistor_value",
-      intent: "subject",
       question: "What resistor do I use and what are the colours?",
-      tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330"],
+      tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330", "red", "brown"],
       answer: "Use the 220-ohm resistor (Red-Red-Brown bands) to protect the LED from burning out."
     },
     {
       id: "switch_wiring",
-      intent: "activity",
       question: "How do I connect the switch and what is blocking it?",
       tokens: ["switch", "button", "wire", "pins", "block", "blocked", "blocking", "divider"],
       answer: "Mount the switch across the center divider trench of the breadboard so the terminals don't bridge together."
+    },
+    {
+      id: "circuit_dead",
+      question: "My circuit is not turning on or is hot",
+      tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery", "hot", "smell", "smoke"],
+      answer: "Disconnect battery immediately if parts are hot! Check that your resistor is in series and you don't have a direct short circuit."
     }
   ];
 
-  function stemWord(word) {
-    if (word.length < 4) return word;
-    return word
-      .replace(/(ing|edly|ingly|ed)$/, '')
-      .replace(/(ies|es|s)$/, '');
+  const STOP_WORDS = new Set(["which", "of", "the", "is", "my", "and", "what", "are", "do", "i", "can", "to", "this", "it"]);
+
+  function stemWord(w) {
+    if (w.length < 4) return w;
+    return w.replace(/(ing|edly|ingly|ed)$/, '').replace(/(ies|es|s)$/, '');
   }
 
-  function levenshteinSim(a, b) {
+  function levenshtein(a, b) {
     if (a === b) return 1.0;
     const la = a.length, lb = b.length;
     if (Math.abs(la - lb) > 2) return 0.0;
-    const matrix = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
-    for (let i = 0; i <= la; i++) matrix[i][0] = i;
-    for (let j = 0; j <= lb; j++) matrix[0][j] = j;
+    const m = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
+    for (let i = 0; i <= la; i++) m[i][0] = i;
+    for (let j = 0; j <= lb; j++) m[0][j] = j;
     for (let i = 1; i <= la; i++) {
       for (let j = 1; j <= lb; j++) {
         const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+        m[i][j] = Math.min(m[i-1][j] + 1, m[i][j-1] + 1, m[i-1][j-1] + cost);
       }
     }
-    return 1.0 - (matrix[la][lb] / Math.max(la, lb));
+    return 1.0 - (m[la][lb] / Math.max(la, lb));
   }
 
-  function runSimulation() {
+  function runAllMethods() {
     const query = document.getElementById("sim-input").value.trim();
     if (!query) return;
 
-    const stops = new Set(["which", "of", "the", "is", "my", "and", "what", "are", "do", "i", "can", "to"]);
-    const rawTokens = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w && !stops.has(w));
-    
-    document.getElementById("sim-tokens").innerText = rawTokens.length ? rawTokens.join(", ") : "(None - all stop words)";
+    const rawTokens = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w && !STOP_WORDS.has(w));
+    document.getElementById("tokens-display").innerText = rawTokens.length ? rawTokens.map(t => `${t} (stem: ${stemWord(t)})`).join(", ") : "(None - all stop words)";
 
-    let topScore = 0;
-    let topMatch = null;
-
+    // METHOD 1: Coverage
+    let covBest = 0, covMatch = null;
     for (const item of SIM_KB) {
-      const itemSet = new Set(item.tokens);
-      let matches = 0;
-
+      const iSet = new Set(item.tokens);
+      let matchSum = 0;
       for (const qt of rawTokens) {
         const qStem = stemWord(qt);
-        let tokenScore = 0;
+        let s = 0;
+        for (const it of iSet) {
+          if (qt === it || qStem === stemWord(it)) { s = 1.0; break; }
+          const fz = levenshtein(qt, it);
+          if (fz >= 0.75) s = Math.max(s, fz);
+        }
+        matchSum += s;
+      }
+      const score = rawTokens.length ? (matchSum / rawTokens.length) : 0;
+      if (score > covBest) { covBest = score; covMatch = item; }
+    }
 
-        for (const it of itemSet) {
-          if (qt === it || qStem === stemWord(it)) {
-            tokenScore = 1.0;
-            break;
-          }
-          const fz = levenshteinSim(qt, it);
-          if (fz >= 0.75) {
-            tokenScore = Math.max(tokenScore, fz);
+    // METHOD 2: TF-IDF (IDF Weights)
+    const idf = { "resistor": 1.4, "led": 1.1, "switch": 1.4, "anode": 1.6, "cathode": 1.6, "battery": 1.2, "hot": 1.5, "smell": 1.6, "block": 1.3 };
+    let tfBest = 0, tfMatch = null;
+    for (const item of SIM_KB) {
+      const iStems = new Set(item.tokens.map(t => stemWord(t)));
+      let wSum = 0, mSum = 0;
+      for (const qt of rawTokens) {
+        const qStem = stemWord(qt);
+        const w = idf[qStem] || idf[qt] || 0.5;
+        wSum += w;
+        if (iStems.has(qStem)) mSum += w;
+        else {
+          for (const ist of iStems) {
+            if (levenshtein(qStem, ist) >= 0.75) { mSum += w * 0.85; break; }
           }
         }
-        matches += tokenScore;
       }
-
-      const score = rawTokens.length ? (matches / rawTokens.length) : 0;
-      if (score > topScore) {
-        topScore = score;
-        topMatch = item;
-      }
+      const score = wSum > 0 ? (mSum / wSum) : 0;
+      if (score > tfBest) { tfBest = score; tfMatch = item; }
     }
 
-    const pct = Math.round(Math.min(1.0, topScore) * 100);
-    const scoreElem = document.getElementById("sim-score");
-    const badgeElem = document.getElementById("sim-badge");
-    const matchElem = document.getElementById("sim-match");
-    const intentElem = document.getElementById("sim-intent");
-    const replyElem = document.getElementById("sim-reply");
+    // METHOD 3: Sub-word N-Grams (3-grams)
+    const getGrams = (str) => {
+      const s = ` ${str.toLowerCase()} `;
+      const g = new Set();
+      for (let i = 0; i < s.length - 2; i++) g.add(s.slice(i, i + 3));
+      return g;
+    };
+    const qGrams = getGrams(query);
+    let ngBest = 0, ngMatch = null;
+    for (const item of SIM_KB) {
+      const tGrams = getGrams(item.tokens.join(" ") + " " + item.question);
+      let matchCount = 0;
+      for (const g of qGrams) if (tGrams.has(g)) matchCount++;
+      const score = (2 * matchCount) / (qGrams.size + Math.min(qGrams.size, tGrams.size));
+      if (score > ngBest) { ngBest = score; ngMatch = item; }
+    }
 
-    scoreElem.innerText = `${pct}%`;
+    // Render individual cards
+    renderCard("cov", covBest, covMatch);
+    renderCard("tfidf", tfBest, tfMatch);
+    renderCard("ngram", ngBest, ngMatch);
 
-    badgeElem.className = "badge";
-    if (pct >= 40) {
-      badgeElem.classList.add("badge-high");
-      badgeElem.innerText = "High Confidence (Assertive)";
-      matchElem.innerText = topMatch.question;
-      intentElem.innerText = `Intent: ${topMatch.intent.toUpperCase()}`;
-      replyElem.innerText = topMatch.answer;
-    } else if (pct >= 20) {
-      badgeElem.classList.add("badge-med");
-      badgeElem.innerText = "Medium Confidence (Clarifying)";
-      matchElem.innerText = topMatch.question;
-      intentElem.innerText = `Intent: ${topMatch.intent.toUpperCase()}`;
-      replyElem.innerText = `Are you asking about "${topMatch.question}"? If so: ${topMatch.answer}`;
+    // Render Ensemble (30% Cov + 40% TF-IDF + 30% N-Gram)
+    const ensembleScore = (0.30 * covBest) + (0.40 * tfBest) + (0.30 * ngBest);
+    const ensemblePct = Math.round(Math.min(1.0, ensembleScore) * 100);
+    const consensusMatch = tfMatch || covMatch || ngMatch;
+
+    document.getElementById("consensus-score").innerText = `${ensemblePct}%`;
+    const replyElem = document.getElementById("consensus-reply");
+
+    if (ensemblePct >= 40 && consensusMatch) {
+      replyElem.innerHTML = `<strong>[High Confidence Match]</strong> ${consensusMatch.answer}`;
+    } else if (ensemblePct >= 20 && consensusMatch) {
+      replyElem.innerHTML = `<strong>[Clarification Required]</strong> Are you asking about <em>"${consensusMatch.question}"</em>?<br/>${consensusMatch.answer}`;
     } else {
-      badgeElem.classList.add("badge-low");
-      badgeElem.innerText = "Low Confidence (Fallback)";
-      matchElem.innerText = "None";
-      intentElem.innerText = "Intent: UNRECOGNIZED";
-      replyElem.innerText = "I don't have a reliable answer for that. Please raise your hand or ask a teammate!";
+      replyElem.innerHTML = `<strong>[Low Confidence &lt;20%]</strong> No reliable match found in the curriculum. Ask a teammate or flag down your teacher.`;
     }
+  }
+
+  function renderCard(id, score, match) {
+    const pct = Math.round(Math.min(1.0, score) * 100);
+    document.getElementById(`score-${id}`).innerText = `${pct}%`;
+    document.getElementById(`match-${id}`).innerText = match ? `Matched: "${match.question.slice(0, 35)}..."` : "No match";
+
+    const badge = document.getElementById(`badge-${id}`);
+    badge.className = "badge";
+    if (pct >= 40) { badge.classList.add("badge-high"); badge.innerText = "High"; }
+    else if (pct >= 20) { badge.classList.add("badge-med"); badge.innerText = "Medium"; }
+    else { badge.classList.add("badge-low"); badge.innerText = "Low / Reject"; }
   }
 
   function setSim(str) {
     document.getElementById("sim-input").value = str;
-    runSimulation();
+    runAllMethods();
   }
 
   function showTab(tabId) {
@@ -772,14 +873,14 @@ Content:
     const text = document.getElementById(elemId).innerText;
     navigator.clipboard.writeText(text).then(() => {
       const btn = event.target;
-      const originalText = btn.innerText;
+      const original = btn.innerText;
       btn.innerText = "Copied!";
-      setTimeout(() => btn.innerText = originalText, 2000);
+      setTimeout(() => btn.innerText = original, 2000);
     });
   }
 
-  // Initial load
-  runSimulation();
+  // Run on initial load
+  runAllMethods();
 </script>
 
 </body>
