@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STEM Assistant & Excel Reclassification Workbench</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #eab308;
+      --danger: #ef4444;
+      --code-bg: #020617;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      background: #090d16;
+    }
+    header h1 { margin: 0 0 8px 0; font-size: 22px; color: var(--accent); }
+    header p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    nav {
+      display: flex;
+      background: #131d31;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      gap: 12px;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    nav button.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    nav button:hover:not(.active) { color: var(--text); }
+
+    main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Interactive Simulator */
+    .simulator-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .input-row { display: flex; gap: 12px; margin-top: 16px; margin-bottom: 16px; }
+    input[type="text"] {
+      flex: 1;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+    }
+    input[type="text"]:focus { outline: 1px solid var(--accent); }
+    button.action-btn {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      padding: 0 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.action-btn:hover { background: var(--accent-hover); }
+
+    .test-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip {
+      background: #283548;
+      border: 1px solid #3d4f68;
+      color: #cbd5e1;
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--accent); color: #fff; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .metric-card {
+      background: #141f33;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .metric-card h4 { margin: 0 0 6px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; }
+    .metric-card .score { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .badge-high { background: #14532d; color: #86efac; }
+    .badge-med { background: #713f12; color: #fde047; }
+    .badge-low { background: #7f1d1d; color: #fca5a5; }
+
+    /* Code Panels */
+    .code-panel {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 16px 0 28px 0;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0b1120;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--muted);
+    }
+    .copy-btn {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #334155; }
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    h2 { font-size: 18px; color: #fff; margin-top: 32px; border-left: 4px solid var(--accent); padding-left: 12px; }
+    p, li { color: #cbd5e1; font-size: 14px; }
+    .instruction-callout {
+      background: #182234;
+      border-left: 4px solid #38bdf8;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>STEM Activity Support & Reclassification Workbench</h1>
+  <p>Two self-contained toolsets: 100% Client-Side Web Assistant for GitHub Pages & Native Python Reclassification for Excel.</p>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('tab-simulator')">1. Live Web Assistant & Logic Simulator</button>
+  <button onclick="showTab('tab-code')">2. Complete Web Code (Drop into GitHub Pages)</button>
+  <button onclick="showTab('tab-excel')">3. Excel Free-Text Reclassification (=PY)</button>
+  <button onclick="showTab('tab-prompts')">4. Gemini Prompts for Your STEM Sites</button>
+</nav>
+
+<main>
+
+  <!-- TAB 1: SIMULATOR -->
+  <section id="tab-simulator" class="tab-content active">
+    <h2>Interactive Confidence & Tokenization Simulator</h2>
+    <p>Test queries against this simulation breadboard activity. Notice how it normalises words, handles word stems (like <em>blocking</em> vs <em>blocked</em>), and forgives minor spelling errors (like <em>resister</em>).</p>
+
+    <div class="simulator-box">
+      <div class="test-chips">
+        <span style="font-size: 12px; color: var(--muted); align-self: center; margin-right: 4px;">Quick tests:</span>
+        <button class="chip" onclick="setSim('Which leg of the LED is positive?')">LED Positive Leg</button>
+        <button class="chip" onclick="setSim('My resister is smoking and wrong')">Typo: "resister"</button>
+        <button class="chip" onclick="setSim('The wire is blocking the switch')">Stemming: "blocking"</button>
+        <button class="chip" onclick="setSim('What are the colours on the bands?')">Resistor Colours</button>
+        <button class="chip" onclick="setSim('Can I go get a glass of water?')">Irrelevant Question</button>
+      </div>
+
+      <div class="input-row">
+        <input type="text" id="sim-input" placeholder="Type a question a student might ask..." value="Which leg of the LED is positive?" />
+        <button class="action-btn" onclick="runSimulation()">Evaluate</button>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h4>Normalized Tokens Extracted</h4>
+          <div id="sim-tokens" style="font-family: monospace; font-size: 13px; color: var(--accent); min-height: 38px;">-</div>
+          <span style="font-size: 11px; color: var(--muted)">Punctuation & stop words removed</span>
+        </div>
+
+        <div class="metric-card">
+          <h4>Calculated Confidence</h4>
+          <div id="sim-score" class="score">-%</div>
+          <div id="sim-badge" class="badge">Awaiting test</div>
+        </div>
+
+        <div class="metric-card">
+          <h4>Matched Topic</h4>
+          <div id="sim-match" style="font-size: 13px; font-weight: 600; color: #fff; min-height: 38px;">-</div>
+          <span id="sim-intent" style="font-size: 11px; color: var(--muted)">Intent: None</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; background: #0b1120; border-radius: 8px; padding: 14px 18px;">
+        <strong style="font-size: 13px; color: var(--accent); text-transform: uppercase;">Assistant Response Output:</strong>
+        <div id="sim-reply" style="margin-top: 6px; font-size: 14px; color: #e2e8f0;">Click Evaluate to simulate the response.</div>
+      </div>
+    </div>
+
+    <div class="instruction-callout">
+      <strong>How the scoring branches:</strong>
+      <ul>
+        <li><strong>Confidence &ge; 40%:</strong> Direct, assertive instructional answer.</li>
+        <li><strong>Confidence 20% &ndash; 39%:</strong> Soft disambiguation: <em>"Are you asking about [Topic]? If so: [Hint]"</em>.</li>
+        <li><strong>Confidence &lt; 20%:</strong> Rejection fallback: <em>"I don't have a confident answer for that. Ask a neighbor or raise your hand!"</em></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- TAB 2: COMPLETE WEB CODE -->
+  <section id="tab-code" class="tab-content">
+    <h2>Turnkey Web Files for GitHub Pages</h2>
+    <p>These two files can be placed straight into your static website repository. No dependencies, no npm, no API keys.</p>
+
+    <h3>File 1: <code>knowledge.js</code> (Your Activity Q&A Base)</h3>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>knowledge.js</span>
+        <button class="copy-btn" onclick="copyCode('code-knowledge')">Copy Code</button>
+      </div>
+      <pre id="code-knowledge">const KNOWLEDGE_BASE = [
+  {
+    id: "led_polarity",
+    category: "Breadboard Lab",
+    intent: "activity",
+    question: "Which leg of the LED is positive?",
+    tokens: ["led", "leg", "legs", "long", "short", "anode", "cathode", "positive", "negative"],
+    answer: "Remember polarity! The longer leg is the positive anode (connects toward battery +). The shorter leg with the flat notch on the casing is the cathode (-)."
+  },
+  {
+    id: "resistor_value",
+    category: "Breadboard Lab",
+    intent: "subject",
+    question: "What resistor do I use?",
+    tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330"],
+    answer: "Use the 220-ohm resistor (Red-Red-Brown bands). If you skip the resistor, the LED will draw excess current and burn out."
+  },
+  {
+    id: "switch_wiring",
+    category: "Breadboard Lab",
+    intent: "activity",
+    question: "How do I connect the switch?",
+    tokens: ["switch", "button", "wire", "pins", "block", "blocked", "press", "divider"],
+    answer: "Mount the switch across the center divider trench of the breadboard so the terminals don't bridge together. Connect one pin to the power rail and the opposite to your resistor."
+  },
+  {
+    id: "circuit_dead",
+    category: "Breadboard Lab",
+    intent: "activity",
+    question: "My circuit is not turning on",
+    tokens: ["light", "turn", "working", "dark", "dead", "power", "broken", "off", "battery"],
+    answer: "Check 3 checkpoints: 1) Is the 9V battery snapped tight? 2) Is the LED facing the right direction? 3) Are the resistor and LED legs in the exact same numbered row?"
+  }
+];</pre>
+    </div>
+
+    <h3>File 2: <code>assistant.js</code> (The Tokeniser, Stemmer & Levenshtein Engine)</h3>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>assistant.js</span>
+        <button class="copy-btn" onclick="copyCode('code-assistant')">Copy Code</button>
+      </div>
+      <pre id="code-assistant">class STEMAssistant {
+  constructor(kb) {
+    this.kb = kb;
+    this.stopWords = new Set([
+      "a", "an", "the", "is", "it", "my", "me", "i", "to", "in", "on", "at",
+      "do", "does", "did", "how", "what", "why", "where", "which", "can",
+      "you", "please", "help", "with", "for", "of", "are"
+    ]);
+  }
+
+  // Suffix-stripping stemmer for word families (block, blocking, blocked)
+  stem(word) {
+    if (word.length < 4) return word;
+    return word
+      .replace(/(ing|edly|ingly|ed)$/, '')
+      .replace(/(ies|es|s)$/, '')
+      .replace(/(tion|tional|ations)$/, 't')
+      .replace(/(ment|ness|able|ible)$/, '');
+  }
+
+  // Levenshtein edit-distance similarity for typos (e.g. resister -> resistor)
+  fuzzySimilarity(a, b) {
+    if (a === b) return 1.0;
+    const la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > 2) return 0.0;
+
+    const matrix = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
+    for (let i = 0; i <= la; i++) matrix[i][0] = i;
+    for (let j = 0; j <= lb; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= la; i++) {
+      for (let j = 1; j <= lb; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return 1.0 - (matrix[la][lb] / Math.max(la, lb));
+  }
+
+  tokenise(text) {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter(t => t.length > 1 && !this.stopWords.has(t));
+  }
+
+  matchToken(qToken, itemSet) {
+    const qStem = this.stem(qToken);
+
+    // Exact or Stem match
+    for (const it of itemSet) {
+      if (qToken === it || qStem === this.stem(it)) return 1.0;
+    }
+    // Typo/Fuzzy match
+    for (const it of itemSet) {
+      const sim = this.fuzzySimilarity(qToken, it);
+      if (sim >= 0.75) return sim; // minor penalty for typo
+    }
+    return 0.0;
+  }
+
+  evaluate(query) {
+    const qTokens = this.tokenise(query);
+    if (qTokens.length === 0) return { confidence: 0, match: null, reply: "Please type a question." };
+
+    let bestScore = 0;
+    let bestMatch = null;
+
+    for (const item of this.kb) {
+      const itemSet = new Set(item.tokens);
+      let matchSum = 0;
+
+      for (const t of qTokens) {
+        matchSum += this.matchToken(t, itemSet);
+      }
+
+      const score = matchSum / qTokens.length;
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = item;
+      }
+    }
+
+    const confidence = parseFloat(Math.min(1.0, bestScore).toFixed(2));
+
+    if (confidence >= 0.40) {
+      return { confidence, match: bestMatch, reply: bestMatch.answer };
+    } else if (confidence >= 0.20) {
+      return {
+        confidence,
+        match: bestMatch,
+        reply: `Are you asking about "${bestMatch.question}"? If so: ${bestMatch.answer}`
+      };
+    } else {
+      return {
+        confidence,
+        match: null,
+        reply: "I'm not sure about that. Try rephrasing or raise your hand for classroom support!"
+      };
+    }
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- TAB 3: EXCEL RECLASSIFICATION -->
+  <section id="tab-excel" class="tab-content">
+    <h2>Native Excel Free-Text Reclassification</h2>
+    <p>Run all three methods (Stemmed Words, Typo N-Grams, and Semantic Cosine Similarity) inside Microsoft Excel using <code>=PY()</code>.</p>
+
+    <div class="instruction-callout">
+      <strong>Workbook Setup Steps:</strong>
+      <ol>
+        <li>Create a table named <code>Taxonomy</code> with columns: <code>Category</code>, <code>Keywords</code>, <code>Description</code>.</li>
+        <li>Create a table named <code>RawInputs</code> with column: <code>FreeText</code>.</li>
+        <li>Click in cell <code>B2</code> of <code>RawInputs</code>, type <code>=PY</code> and paste the code below.</li>
+        <li>Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</li>
+      </ol>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-header">
+        <span>Excel Python Formula (=PY)</span>
+        <button class="copy-btn" onclick="copyCode('code-excel')">Copy Python</button>
+      </div>
+      <pre id="code-excel">import numpy as np
+import pandas as pd
+import re
+import nltk
+from nltk.stem import PorterStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+ps = PorterStemmer()
+
+# 1. Pull data directly from Excel tables
+tax_df = xl("Taxonomy[#All]", headers=True)
+raw_df = xl("RawInputs[#All]", headers=True)
+
+categories = tax_df['Category'].tolist()
+target_corpus = (tax_df['Keywords'].fillna("") + " " + tax_df['Description'].fillna("")).tolist()
+raw_texts = raw_df['FreeText'].fillna("").tolist()
+
+# 2. Tokenize and Stem function (word families)
+def preprocess(text):
+    words = re.findall(r'[a-zA-Z]+', str(text).lower())
+    stops = {"a", "an", "the", "is", "it", "my", "to", "in", "on", "do", "how", "what", "why", "of"}
+    return " ".join([ps.stem(w) for w in words if w not in stops and len(w) > 1])
+
+stemmed_targets = [preprocess(t) for t in target_corpus]
+stemmed_raw = [preprocess(r) for r in raw_texts]
+
+# Method 1: Word-level TF-IDF (Stemmed)
+word_vec = TfidfVectorizer(ngram_range=(1, 2))
+word_vec.fit(stemmed_targets + stemmed_raw)
+word_sim = cosine_similarity(word_vec.transform(stemmed_raw), word_vec.transform(stemmed_targets))
+
+# Method 2: Sub-word character n-grams (Typo resilient)
+char_vec = TfidfVectorizer(analyzer='char_wb', ngram_range=(3, 5))
+char_vec.fit(target_corpus + raw_texts)
+char_sim = cosine_similarity(char_vec.transform(raw_texts), char_vec.transform(target_corpus))
+
+# Method 3: Ensemble blend (50% Stemmed Word + 50% Typo Sub-word)
+ensemble = (0.5 * word_sim) + (0.5 * char_sim)
+
+results = []
+for i, scores in enumerate(ensemble):
+    best_idx = int(np.argmax(scores))
+    conf = float(scores[best_idx])
+    
+    results.append({
+        "Final Category": categories[best_idx] if conf >= 0.35 else "Unclassified",
+        "Confidence": f"{round(conf * 100, 1)}%",
+        "Stem Match": f"{round(float(word_sim[i, best_idx]) * 100, 1)}%",
+        "Typo-Resilient Match": f"{round(float(char_sim[i, best_idx]) * 100, 1)}%",
+        "Action Status": "Automated" if conf >= 0.45 else ("Review" if conf >= 0.25 else "Manual Check")
+    })
+
+pd.DataFrame(results)</pre>
+    </div>
+  </section>
+
+  <!-- TAB 4: GEMINI PROMPT TEMPLATES -->
+  <section id="tab-prompts" class="tab-content">
+    <h2>Gemini Prompts for Your STEM Resources</h2>
+    <p>Whenever you build a new STEM activity, you don't need to manually type out keywords or write the knowledge base. Copy and paste one of these prompt templates into Gemini along with your raw code.</p>
+
+    <h3>Template 1: Full HTML/JS Site Ingestion</h3>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>Prompt Template: Ingest Website &rarr; Produce knowledge.js</span>
+        <button class="copy-btn" onclick="copyCode('prompt-1')">Copy Prompt</button>
+      </div>
+      <pre id="prompt-1">I am attaching the HTML and JavaScript source code for my interactive STEM activity website.
+
+Please analyze the activity mechanics, student steps, common failure points, and underlying concepts. Then, output a single, complete `const KNOWLEDGE_BASE = [...]` JavaScript file formatted for my client-side token search assistant.
+
+Follow these strict specifications:
+1. Cover 12 to 18 distinct student questions across three intents:
+   - "concept" (the scientific/mathematical mechanism or theory)
+   - "subject" (curriculum terms, variables, definitions)
+   - "activity" (step instructions, buttons, common code or UI bugs)
+2. For every entry provide:
+   - `id`: Unique string tag
+   - `category`: The name of the specific tool or module
+   - `intent`: "concept" | "subject" | "activity"
+   - `question`: Natural language student question
+   - `tokens`: Array of 8-12 lowercase base words and high-signal synonyms
+   - `answer`: Clear, encouraging guidance (under 3 sentences). Provide hints and pointers rather than giving full solutions away.
+3. Account for common student confusion points in this specific activity.
+
+Here is the source code:
+[PASTE YOUR HTML/JS HERE]</pre>
+    </div>
+
+    <h3>Template 2: Turning a Lab Worksheet/Syllabus into Knowledge Entries</h3>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>Prompt Template: Ingest Worksheet/Curriculum</span>
+        <button class="copy-btn" onclick="copyCode('prompt-2')">Copy Prompt</button>
+      </div>
+      <pre id="prompt-2">Here is the student instruction sheet and rubric for my upcoming STEM session.
+
+Transform this document into the structured `KNOWLEDGE_BASE` array for our classroom assistant:
+- Extract all key procedural checkpoints (Step 1, Step 2, etc.).
+- Generate anticipated questions where students frequently stall.
+- Provide targeted keyword tokens for each entry including common student colloquialisms.
+- Ensure the output is valid, copyable JavaScript starting with `const KNOWLEDGE_BASE = [ ... ];`.
+
+Content:
+[PASTE WORKSHEET / LAB INSTRUCTIONS HERE]</pre>
+    </div>
+  </section>
+
+</main>
+
+<!-- In-page Simulator Engine -->
+<script>
+  // Embedded knowledge base for simulator
+  const SIM_KB = [
+    {
+      id: "led_polarity",
+      intent: "activity",
+      question: "Which leg of the LED is positive?",
+      tokens: ["led", "leg", "legs", "long", "short", "anode", "cathode", "positive", "negative"],
+      answer: "The longer leg is the positive anode (connects towards battery +). The shorter leg with the flat notch is the cathode (-)."
+    },
+    {
+      id: "resistor_value",
+      intent: "subject",
+      question: "What resistor do I use and what are the colours?",
+      tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330"],
+      answer: "Use the 220-ohm resistor (Red-Red-Brown bands) to protect the LED from burning out."
+    },
+    {
+      id: "switch_wiring",
+      intent: "activity",
+      question: "How do I connect the switch and what is blocking it?",
+      tokens: ["switch", "button", "wire", "pins", "block", "blocked", "blocking", "divider"],
+      answer: "Mount the switch across the center divider trench of the breadboard so the terminals don't bridge together."
+    }
+  ];
+
+  function stemWord(word) {
+    if (word.length < 4) return word;
+    return word
+      .replace(/(ing|edly|ingly|ed)$/, '')
+      .replace(/(ies|es|s)$/, '');
+  }
+
+  function levenshteinSim(a, b) {
+    if (a === b) return 1.0;
+    const la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > 2) return 0.0;
+    const matrix = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
+    for (let i = 0; i <= la; i++) matrix[i][0] = i;
+    for (let j = 0; j <= lb; j++) matrix[0][j] = j;
+    for (let i = 1; i <= la; i++) {
+      for (let j = 1; j <= lb; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+      }
+    }
+    return 1.0 - (matrix[la][lb] / Math.max(la, lb));
+  }
+
+  function runSimulation() {
+    const query = document.getElementById("sim-input").value.trim();
+    if (!query) return;
+
+    const stops = new Set(["which", "of", "the", "is", "my", "and", "what", "are", "do", "i", "can", "to"]);
+    const rawTokens = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w && !stops.has(w));
+    
+    document.getElementById("sim-tokens").innerText = rawTokens.length ? rawTokens.join(", ") : "(None - all stop words)";
+
+    let topScore = 0;
+    let topMatch = null;
+
+    for (const item of SIM_KB) {
+      const itemSet = new Set(item.tokens);
+      let matches = 0;
+
+      for (const qt of rawTokens) {
+        const qStem = stemWord(qt);
+        let tokenScore = 0;
+
+        for (const it of itemSet) {
+          if (qt === it || qStem === stemWord(it)) {
+            tokenScore = 1.0;
+            break;
+          }
+          const fz = levenshteinSim(qt, it);
+          if (fz >= 0.75) {
+            tokenScore = Math.max(tokenScore, fz);
+          }
+        }
+        matches += tokenScore;
+      }
+
+      const score = rawTokens.length ? (matches / rawTokens.length) : 0;
+      if (score > topScore) {
+        topScore = score;
+        topMatch = item;
+      }
+    }
+
+    const pct = Math.round(Math.min(1.0, topScore) * 100);
+    const scoreElem = document.getElementById("sim-score");
+    const badgeElem = document.getElementById("sim-badge");
+    const matchElem = document.getElementById("sim-match");
+    const intentElem = document.getElementById("sim-intent");
+    const replyElem = document.getElementById("sim-reply");
+
+    scoreElem.innerText = `${pct}%`;
+
+    badgeElem.className = "badge";
+    if (pct >= 40) {
+      badgeElem.classList.add("badge-high");
+      badgeElem.innerText = "High Confidence (Assertive)";
+      matchElem.innerText = topMatch.question;
+      intentElem.innerText = `Intent: ${topMatch.intent.toUpperCase()}`;
+      replyElem.innerText = topMatch.answer;
+    } else if (pct >= 20) {
+      badgeElem.classList.add("badge-med");
+      badgeElem.innerText = "Medium Confidence (Clarifying)";
+      matchElem.innerText = topMatch.question;
+      intentElem.innerText = `Intent: ${topMatch.intent.toUpperCase()}`;
+      replyElem.innerText = `Are you asking about "${topMatch.question}"? If so: ${topMatch.answer}`;
+    } else {
+      badgeElem.classList.add("badge-low");
+      badgeElem.innerText = "Low Confidence (Fallback)";
+      matchElem.innerText = "None";
+      intentElem.innerText = "Intent: UNRECOGNIZED";
+      replyElem.innerText = "I don't have a reliable answer for that. Please raise your hand or ask a teammate!";
+    }
+  }
+
+  function setSim(str) {
+    document.getElementById("sim-input").value = str;
+    runSimulation();
+  }
+
+  function showTab(tabId) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll("nav button").forEach(el => el.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+    event.target.classList.add("active");
+  }
+
+  function copyCode(elemId) {
+    const text = document.getElementById(elemId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      const originalText = btn.innerText;
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = originalText, 2000);
+    });
+  }
+
+  // Run on load
+  runSimulation();
+</script>
+
+</body>
+</html>
