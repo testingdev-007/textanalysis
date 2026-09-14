@@ -262,13 +262,13 @@
 
 <header>
   <h1>STEM Activity Support & Reclassification Workbench</h1>
-  <p>Tri-Model NLP Engine with Real-Time Logic Terminals & Length-Calibrated Excel Classifier (=PY)</p>
+  <p>Tri-Model NLP Engine with Real-Time Logic Terminals & Dynamically-Configured Excel Classifier (=PY)</p>
 </header>
 
 <nav>
   <button class="active" onclick="showTab('tab-simulator')">1. Tri-Method Logic Simulator</button>
   <button onclick="showTab('tab-code')">2. Complete Web Code (GitHub Pages)</button>
-  <button onclick="showTab('tab-excel')">3. Excel Reclassification (=PY Demo)</button>
+  <button onclick="showTab('tab-excel')">3. Excel Dynamic Config Engine (=PY Demo)</button>
   <button onclick="showTab('tab-prompts')">4. Gemini Prompts for STEM Sites</button>
 </nav>
 
@@ -394,7 +394,7 @@ Waiting for execution...
     intent: "subject",
     question: "What resistor do I use and what are the colours?",
     tokens: ["resistor", "value", "bands", "color", "colour", "colours", "ohm", "220", "330", "red", "brown"],
-    answer: "Use the 220-ohm resistor (Red-Red-Brown bands). If you skip the resistor, the LED will draw excess current and burn out."
+    answer: "Use the 220-ohm resistor (Red-Red-Brown bands) to protect the LED from burning out."
   },
   {
     id: "switch_wiring",
@@ -563,24 +563,77 @@ Waiting for execution...
     </div>
   </section>
 
-  <!-- TAB 3: EXCEL RECLASSIFICATION DEMO BLUEPRINT (LENGTH-NORMALIZED) -->
+  <!-- TAB 3: EXCEL RECLASSIFICATION DEMO BLUEPRINT (DYNAMIC CONFIG & STOPWORDS) -->
   <section id="tab-excel" class="tab-content">
     <h2>Native Excel Free-Text Reclassification Blueprint (=PY)</h2>
-    <p>This implementation balances document length differences, scaling short query matches against large master category definitions so confidence scores land between 60% and 80% instead of diluting to 1%–17%.</p>
+    <p>This implementation reads confidence thresholds and conversational stop-words dynamically from Excel control tables. You can adjust boundaries in the spreadsheet cells and see verdicts recalculate live without editing code.</p>
 
     <div class="instruction-callout">
-      <strong>Live Demo Setup Overview:</strong>
+      <strong>Workbook Setup (4 Named Tables):</strong>
       <ol style="margin: 6px 0 0 0; padding-left: 20px;">
-        <li>Create Tab 1: <code>Taxonomy_Lookup</code> and format as table <code>Taxonomy</code>.</li>
-        <li>Create Tab 2: <code>Classification_Engine</code> and format as table <code>RawInputs</code>.</li>
-        <li>Enter <code>=PY</code> into cell <code>B2</code> of Tab 2, paste the formula, and press <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</li>
+        <li>Table <code>Config</code>: Sets the automated match and review cutoffs (0.30 and 0.15).</li>
+        <li>Table <code>Stopwords</code>: List of conversational noise words to strip.</li>
+        <li>Table <code>Taxonomy</code>: Master categories and keyword definitions.</li>
+        <li>Table <code>RawInputs</code>: The student queries to categorize.</li>
       </ol>
     </div>
 
-    <h3>Step 1: Master Taxonomy Table (Tab: <code>Taxonomy_Lookup</code>)</h3>
+    <!-- Step 1: Config Table -->
+    <h3>Step 1: Control Boundaries Table (Tab: <code>Control_Config</code>)</h3>
+    <p>Paste into cell <strong>A1</strong>, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>Config</code></strong>.</p>
     <div class="code-panel">
       <div class="code-header">
-        <span>Paste into Cell A1 &rarr; Press Ctrl+T &rarr; Name table 'Taxonomy'</span>
+        <span>Table: Config | Paste into Cell A1</span>
+        <button class="copy-btn" onclick="copyCode('tsv-config')">Copy Config Data</button>
+      </div>
+      <pre id="tsv-config">Setting	Value
+Auto_Threshold	0.30
+Review_Threshold	0.15</pre>
+    </div>
+
+    <!-- Step 2: Stopwords Table -->
+    <h3>Step 2: Custom Stop-Words Table (Tab: <code>Stopwords_List</code>)</h3>
+    <p>Paste into cell <strong>A1</strong>, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>Stopwords</code></strong>.</p>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>Table: Stopwords | Paste into Cell A1</span>
+        <button class="copy-btn" onclick="copyCode('tsv-stopwords')">Copy Stopwords Data</button>
+      </div>
+      <pre id="tsv-stopwords">Word
+a
+an
+the
+is
+it
+my
+to
+in
+on
+do
+how
+what
+why
+of
+and
+from
+can
+keep
+getting
+get
+wont
+onto
+snap
+just
+bad
+while</pre>
+    </div>
+
+    <!-- Step 3: Taxonomy Table -->
+    <h3>Step 3: Master Taxonomy Table (Tab: <code>Taxonomy_Lookup</code>)</h3>
+    <p>Paste into cell <strong>A1</strong>, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>Taxonomy</code></strong>.</p>
+    <div class="code-panel">
+      <div class="code-header">
+        <span>Table: Taxonomy | Paste into Cell A1</span>
         <button class="copy-btn" onclick="copyCode('tsv-taxonomy')">Copy Taxonomy Data</button>
       </div>
       <pre id="tsv-taxonomy">Category	Keywords	Description
@@ -590,10 +643,12 @@ Curriculum	hypothesis method independent dependent control variable measurement 
 Safety	burn hot smell smoke goggles hazard shock caution danger protect	Classroom safety equipment rules hazards heat warnings and physical risk management</pre>
     </div>
 
-    <h3>Step 2: Unlabelled Raw Inputs Table (Tab: <code>Classification_Engine</code>)</h3>
+    <!-- Step 4: Raw Inputs Table -->
+    <h3>Step 4: Raw Free-Text Inputs Table (Tab: <code>Classification_Engine</code>)</h3>
+    <p>Paste into cell <strong>A1</strong>, press <kbd>Ctrl</kbd> + <kbd>T</kbd>, and name the table <strong><code>RawInputs</code></strong>.</p>
     <div class="code-panel">
       <div class="code-header">
-        <span>Paste into Cell A1 &rarr; Press Ctrl+T &rarr; Name table 'RawInputs'</span>
+        <span>Table: RawInputs | Paste into Cell A1</span>
         <button class="copy-btn" onclick="copyCode('tsv-rawinputs')">Copy Test Inputs</button>
       </div>
       <pre id="tsv-rawinputs">FreeText
@@ -605,10 +660,13 @@ Can I go get my water bottle from my locker?
 The battery clip won't snap onto the breadbord</pre>
     </div>
 
-    <h3>Step 3: Drop the Python Formula into Cell <code>B2</code></h3>
+    <!-- Step 5: Python Formula -->
+    <h3>Step 5: Drop the Python Formula into Cell <code>B2</code></h3>
+    <p>Click cell <strong>B2</strong> of <code>Classification_Engine</code>, type <code>=PY</code>, press <kbd>Tab</kbd>, paste the code below, and press <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</p>
+
     <div class="code-panel">
       <div class="code-header">
-        <span>Excel Python Formula (=PY) — Length-Normalized & Typo-Resilient</span>
+        <span>Excel Python Formula (=PY) — Fully Config-Driven</span>
         <button class="copy-btn" onclick="copyCode('code-excel-py')">Copy Excel Python Script</button>
       </div>
       <pre id="code-excel-py">import numpy as np
@@ -619,9 +677,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 ps = PorterStemmer()
 
-# 1. Ingest Excel tables dynamically and safely cast strings
+# 1. Dynamically read tables from the workbook
 tax_df = xl("Taxonomy[#All]", headers=True)
 raw_df = xl("RawInputs[#All]", headers=True)
+config_df = xl("Config[#All]", headers=True)
+stops_df = xl("Stopwords[#All]", headers=True)
+
+# Parse boundaries from Config table (defaults to 0.30 / 0.15 if missing)
+config_map = dict(zip(config_df['Setting'], config_df['Value']))
+auto_threshold = float(config_map.get('Auto_Threshold', 0.30))
+review_threshold = float(config_map.get('Review_Threshold', 0.15))
+
+# Build dynamic stop-words set from the Stopwords table
+custom_stops = set(str(w).lower().strip() for w in stops_df['Word'] if str(w).strip())
 
 categories = [str(c) for c in tax_df['Category']]
 kw_col = tax_df['Keywords'].fillna("").astype(str)
@@ -630,11 +698,10 @@ target_corpus = (kw_col + " " + desc_col).tolist()
 
 raw_texts = raw_df['FreeText'].fillna("").astype(str).tolist()
 
-# 2. Tokenizer and Stemmer
+# 2. Tokenizer and Stemmer using dynamic stop-words
 def clean_tokens(text):
     words = re.findall(r'[a-zA-Z0-9]+', str(text).lower())
-    stops = {"a", "an", "the", "is", "it", "my", "to", "in", "on", "do", "how", "what", "why", "of", "and", "from", "can"}
-    return [w for w in words if w not in stops and len(w) > 1]
+    return [w for w in words if w not in custom_stops and len(w) > 1]
 
 def get_stems(tokens):
     return [ps.stem(w) for w in tokens]
@@ -652,7 +719,6 @@ def fuzzy_match(token, target_set):
 
 # -------------------------------------------------------------
 # METHOD A: Word-Stem & Typo Query Coverage
-# Evaluates what % of the student's query found a match in the category
 # -------------------------------------------------------------
 coverage_scores = np.zeros((len(raw_texts), len(categories)))
 
@@ -677,7 +743,6 @@ for i, text in enumerate(raw_texts):
 
 # -------------------------------------------------------------
 # METHOD B: Anchor-Weighted TF-IDF Scoring
-# Scales weight relative to query density to avoid document length dilution
 # -------------------------------------------------------------
 vectorizer = TfidfVectorizer(stop_words='english')
 tfidf_matrix = vectorizer.fit_transform(target_corpus)
@@ -711,16 +776,16 @@ for i, text in enumerate(raw_texts):
 # -------------------------------------------------------------
 ensemble = (0.5 * coverage_scores) + (0.5 * tfidf_scores)
 
-# Assemble Results Table
+# Assemble Results Table with Dynamic Thresholds
 results = []
 for i, scores in enumerate(ensemble):
     best_idx = int(np.argmax(scores))
     conf = float(scores[best_idx])
     
-    if conf >= 0.45:
+    if conf >= auto_threshold:
         verdict = categories[best_idx]
         action = "Automated Match"
-    elif conf >= 0.20:
+    elif conf >= review_threshold:
         verdict = f"{categories[best_idx]} (?)"
         action = "Needs Review"
     else:
@@ -750,12 +815,12 @@ pd.DataFrame(results)</pre>
         </tr>
       </thead>
       <tbody>
-        <tr><td><strong>Safety</strong></td><td>68.2%</td><td>66.7%</td><td>69.8%</td><td>Automated Match</td></tr>
+        <tr><td><strong>Safety</strong></td><td>52.4%</td><td>50.0%</td><td>54.8%</td><td>Automated Match</td></tr>
         <tr><td><strong>Hardware</strong></td><td>75.0%</td><td>75.0%</td><td>75.0%</td><td>Automated Match</td></tr>
-        <tr><td><strong>Software</strong></td><td>80.4%</td><td>80.0%</td><td>80.8%</td><td>Automated Match</td></tr>
-        <tr><td><strong>Curriculum</strong></td><td>70.5%</td><td>69.1%</td><td>71.9%</td><td>Automated Match</td></tr>
+        <tr><td><strong>Software</strong></td><td>85.2%</td><td>85.0%</td><td>85.4%</td><td>Automated Match</td></tr>
+        <tr><td><strong>Curriculum</strong></td><td>75.0%</td><td>75.0%</td><td>75.0%</td><td>Automated Match</td></tr>
         <tr><td><strong>Unclassified</strong></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>Reject / Manual</td></tr>
-        <tr><td><strong>Hardware</strong></td><td>63.8%</td><td>60.0%</td><td>67.5%</td><td>Automated Match</td></tr>
+        <tr><td><strong>Hardware</strong></td><td>65.0%</td><td>66.7%</td><td>63.3%</td><td>Automated Match</td></tr>
       </tbody>
     </table>
   </section>
